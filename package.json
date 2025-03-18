@@ -1,0 +1,48 @@
+{
+    "name": "react-simple-rte",
+    "version": "0.1.0",
+    "description": "A simple React rich text editor component",
+    "type": "module",
+    "main": "dist/index.js",
+    "module": "dist/index.esm.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "rollup -c",
+        "test": "jest",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "react",
+        "rich text",
+        "editor",
+        "wysiwyg",
+        "draft-js"
+    ],
+    "peerDependencies": {
+        "react": "^17.0.0 || ^18.0.0",
+        "react-dom": "^17.0.0 || ^18.0.0"
+    },
+    "dependencies": {
+        "draft-js": "^0.11.7",
+        "lucide-react": "^0.303.0",
+        "tslib": "^2.8.1"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^25.0.8",
+        "@rollup/plugin-node-resolve": "^15.3.1",
+        "@rollup/plugin-terser": "^0.4.4",
+        "@rollup/plugin-typescript": "^11.1.6",
+        "@types/draft-js": "^0.11.18",
+        "@types/react": "^18.3.18",
+        "@types/react-dom": "^18.3.5",
+        "jest": "^29.7.0",
+        "rollup": "^3.29.5",
+        "rollup-plugin-peer-deps-external": "^2.2.4",
+        "rollup-plugin-postcss": "^4.0.2"
+    },
+    "author": "Mohammad Ali",
+    "license": "MIT"
+}
