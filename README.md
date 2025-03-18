@@ -57,7 +57,7 @@ export default App;
 You can customize the editor using props:
 
 ```jsx
-<SimpleRTE
+<ScrivlyEditor
   value={content}
   onChange={setContent}
   toolbarOptions={["bold", "italic", "underline", "link", "image"]}
