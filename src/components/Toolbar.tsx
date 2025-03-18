@@ -1,5 +1,3 @@
-"use client"
-
 import type { EditorState } from "draft-js"
 import { AtomicBlockUtils, EditorState as EditorStateType } from "draft-js"
 import {

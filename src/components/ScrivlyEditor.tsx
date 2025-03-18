@@ -1,11 +1,9 @@
-"use client";
-
 import {
-  ContentState,
-  convertFromRaw,
-  convertToRaw,
-  EditorState,
-  RichUtils,
+    ContentState,
+    convertFromRaw,
+    convertToRaw,
+    EditorState,
+    RichUtils,
 } from "draft-js";
 import "draft-js/dist/Draft.css";
 import type React from "react";

@@ -21,20 +21,20 @@ A lightweight, customizable rich text editor for React applications built on **D
 
 ```bash
 # Using npm
-npm install scrivly-editor
+npm install scrivly
 
 # Using yarn
-yarn add scrivly-editor
+yarn add scrivly
 
 # Using pnpm
-pnpm add scrivly-editor
+pnpm add scrivly
 ```
 
 ## 🛠 Usage
 
 ```jsx
 import React, { useState } from "react";
-import { ScrivlyEditor } from "scrivly-editor";
+import { ScrivlyEditor } from "scrivly";
 
 const App = () => {
   const [content, setContent] = useState("");

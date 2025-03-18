@@ -1,5 +1,3 @@
-"use client"
-
 import { Editor, type DraftHandleValue, type EditorState } from "draft-js"
 import type React from "react"
 
