@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { RichTextEditor } from "../src";
+import { ScrivlyEditor } from "../src";
 import "../src/styles.css";
 
 const App = () => {
@@ -27,7 +27,7 @@ const App = () => {
                 Rich Text Editor
             </h1>
 
-            <RichTextEditor
+            <ScrivlyEditor
                 initialContent="Start editing here..."
                 onChange={handleChange}
                 placeholder="Type something beautiful..."

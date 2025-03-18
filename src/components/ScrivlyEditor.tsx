@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Content } from "./Content"
 import { Toolbar } from "./Toolbar"
 
-export interface RichTextEditorProps {
+export interface ScrivlyEditorProps {
   initialContent?: string
   onChange?: (content: string) => void
   className?: string
@@ -14,7 +14,7 @@ export interface RichTextEditorProps {
   contentClassName?: string
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({
+export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
   initialContent = "",
   onChange,
   className = "",
