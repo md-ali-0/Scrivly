@@ -1,5 +1,3 @@
-"use client"
-
 import type { EditorState } from "draft-js"
 import { Bold, Code, File, FileCode, Italic, Link, List, ListOrdered, Strikethrough } from "lucide-react"
 import type React from "react"

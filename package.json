@@ -1,5 +1,5 @@
 {
-    "name": "react-simple-rte",
+    "name": "scrivly",
     "version": "0.1.0",
     "description": "A simple React rich text editor component",
     "type": "module",
