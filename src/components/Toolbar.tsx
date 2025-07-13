@@ -1,42 +1,49 @@
 "use client"
 
-import type React from "react"
 import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
   Bold,
-  Italic,
-  Underline,
-  Strikethrough,
+  CheckSquare,
+  ChevronDown,
   Code,
-  Subscript,
-  Superscript,
-  Quote,
+  Eraser,
+  FileCode,
+  ImageIcon,
+  Indent,
+  Italic,
+  Link,
   List,
   ListOrdered,
-  CheckSquare,
-  FileCode,
-  Link,
-  ImageIcon,
-  Video,
-  Smile,
-  Table,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  Indent,
-  Outdent,
-  Palette,
-  Type,
-  RotateCcw,
-  RotateCw,
-  Eraser,
-  Moon,
-  Sun,
+  LucideIcon,
   Maximize,
   Minimize,
-  ChevronDown,
-} from "lucide-react"
-import type { ToolbarOption, BlockFormat, FontSize, FontFamily, ToolbarProps } from "../types/editor"
+  Moon,
+  Outdent,
+  Palette,
+  Quote,
+  RotateCcw,
+  RotateCw,
+  Smile,
+  Strikethrough,
+  Subscript,
+  Sun,
+  Superscript,
+  Table,
+  Type,
+  Underline,
+  Video,
+} from "lucide-react";
+import type React from "react";
+import type { BlockFormat, FontFamily, FontSize, ToolbarOption, ToolbarProps } from "../types/editor";
+
+export type ToolbarConfig = {
+  icon: LucideIcon;
+  label: string;
+  shortcut?: string;
+};
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   isActive,
@@ -156,13 +163,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   ]
 
   const renderButton = (option: string) => {
-    if (!toolbarOptions.includes(option as ToolbarOption) && option !== "customTool") return null
+    if (!toolbarOptions.includes(option as ToolbarOption) && option !== "customTool") return null;
 
     // Handle custom tools
-    const customTool = customTools.find((tool) => tool.id === option)
+    const customTool = customTools.find((tool) => tool.id === option);
     if (customTool) {
-      const Icon = customTool.icon
-      const active = isActive[customTool.id]
+      const Icon = customTool.icon;
+      const active = isActive[customTool.id];
       return (
         <button
           key={customTool.id}
@@ -173,28 +180,28 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         >
           <Icon size={16} />
         </button>
-      )
+      );
     }
 
-    const config = buttonConfig[option as keyof typeof buttonConfig]
-    if (!config) return null
+    const config = buttonConfig[option as keyof typeof buttonConfig];
+    if (!config) return null;
 
-    const Icon = config.icon
-    const active = isActive[option]
-    const disabled = (option === "undo" && !canUndo) || (option === "redo" && !canRedo)
-
+    const Icon = config.icon;
+    const active = isActive[option];
+    const disabled = (option === "undo" && !canUndo) || (option === "redo" && !canRedo);
     return (
       <button
         key={option}
         type="button"
         className={`toolbar-button ${active ? "active" : ""} ${disabled ? "disabled" : ""}`}
         onClick={() => !disabled && onAction(option)}
-        title={`${config.label}${config.shortcut ? ` (${config.shortcut})` : ""}`}
+        // @ts-ignore
+        title={config.shortcut ? `${config.label} (${config.shortcut})` : config.label}
         disabled={disabled}
       >
         <Icon size={16} />
       </button>
-    )
+    );
   }
 
   const renderDropdown = (option: string) => {

@@ -4,8 +4,19 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "importHelpers": true,
+    "module": "ESNext",
+    "target": "ES2017"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "app/**/*", "**/*.test.*", "**/*.stories.*"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "app/**/*",
+    "**/*.test.*",
+    "**/*.stories.*"
+  ]
 }

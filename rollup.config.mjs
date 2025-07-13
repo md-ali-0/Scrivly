@@ -1,10 +1,11 @@
-import commonjs from "@rollup/plugin-commonjs"
-import resolve from "@rollup/plugin-node-resolve"
-import typescript from "@rollup/plugin-typescript"
-import dts from "rollup-plugin-dts"
-import peerDepsExternal from "rollup-plugin-peer-deps-external"
-import postcss from "rollup-plugin-postcss"
-import { terser } from "rollup-plugin-terser"
+import { babel } from "@rollup/plugin-babel";
+import commonjs from "@rollup/plugin-commonjs";
+import resolve from "@rollup/plugin-node-resolve";
+import typescript from "@rollup/plugin-typescript";
+import dts from "rollup-plugin-dts";
+import peerDepsExternal from "rollup-plugin-peer-deps-external";
+import postcss from "rollup-plugin-postcss";
+import { terser } from "rollup-plugin-terser";
 
 export default [
   // Main build
@@ -32,19 +33,38 @@ export default [
       }),
       commonjs(),
       typescript({
-        tsconfig: "./tsconfig.json",
+        tsconfig: "./tsconfig.build.json",
         declaration: true,
         declarationDir: "dist",
-        exclude: ["**/*.test.*", "**/*.stories.*", "app/**/*"],
+        exclude: ["**/*.test.*", "**/*.stories.*", "app/**/*.ts", "app/**/*.tsx"], // Allow CSS in app
+      }),
+      babel({
+        extensions: [".js", ".jsx", ".ts", ".tsx"],
+        babelHelpers: "bundled",
+        presets: [
+          ["@babel/preset-env", { targets: "defaults" }],
+          "@babel/preset-react",
+          "@babel/preset-typescript",
+        ],
+        exclude: "node_modules/**",
       }),
       postcss({
-        extract: true,
+        extensions: [".css"],
+        extract: "styles.css", // Output to dist/styles.css
         minimize: true,
         sourceMap: true,
+        include: ["src/**/*.css", "app/**/*.css"], // Include src and app CSS
+        inject: false, // Disable automatic CSS injection to ensure extraction
+        // Debugging: Log processed files
+        onwrite: (details) => {
+          console.log(`PostCSS writing to: ${details.dest}`);
+        },
       }),
       terser(),
     ],
     external: ["react", "react-dom", "lucide-react"],
+    // Enable debug logging
+    logLevel: "debug",
   },
   // Type definitions
   {
@@ -53,4 +73,4 @@ export default [
     plugins: [dts()],
     external: [/\.css$/],
   },
-]
+];
