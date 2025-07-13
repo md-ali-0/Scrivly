@@ -5,18 +5,9 @@ import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import { Toolbar } from "./Toolbar"
 import { TableModal } from "./TableModal"
 import { VideoModal } from "./VideoModal"
-import { ImageModal } from "./ImageModal"
 import { ColorPicker } from "./ColorPicker"
 import { EmojiPicker } from "./EmojiPicker"
-import type {
-  ScrivlyEditorProps,
-  BlockFormat,
-  TableData,
-  VideoData,
-  ImageData,
-  FontSize,
-  FontFamily,
-} from "../types/editor"
+import type { ScrivlyEditorProps, BlockFormat, TableData, VideoData, FontSize, FontFamily } from "../types/editor"
 
 export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
   value = "",
@@ -56,7 +47,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
     "fullscreen",
     "darkMode",
   ],
-  customTools = [],
   placeholder = "Start writing something amazing...",
   className = "",
   toolbarClassName = "",
@@ -71,10 +61,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
   autoSave = false,
   autoSaveInterval = 5000,
   spellCheck = true,
-  allowImageUpload = false,
-  onImageUpload,
-  allowVideoUpload = false,
-  onVideoUpload,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null)
   const [isActive, setIsActive] = useState<Record<string, boolean>>({})
@@ -87,7 +73,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showTableModal, setShowTableModal] = useState(false)
   const [showVideoModal, setShowVideoModal] = useState(false)
-  const [showImageModal, setShowImageModal] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState<"text" | "background" | null>(null)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null)
@@ -189,15 +174,8 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
       node = node.parentNode
     }
 
-    // Check custom tools
-    customTools.forEach((tool) => {
-      if (tool.isActive) {
-        activeStates[tool.id] = tool.isActive(editorRef.current)
-      }
-    })
-
     setIsActive(activeStates)
-  }, [customTools])
+  }, [])
 
   // Handle content change
   const handleInput = useCallback(() => {
@@ -271,7 +249,7 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
         tableHTML += "<tr>"
         for (let j = 0; j < cols; j++) {
           const cellContent = tableData.data?.[i]?.[j] || ""
-          tableHTML += `<td style="border: 1px solid var(--border-color); padding: 12px; min-width: 100px;" contenteditable="true">${cellContent}</td>`
+          tableHTML += `<td style="border: 1px solid #ccc; padding: 8px; min-width: 100px;" contenteditable="true">${cellContent}</td>`
         }
         tableHTML += "</tr>"
       }
@@ -301,7 +279,7 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
       }
 
       const videoHTML = `
-      <div class="video-container" style="position: relative; margin: 1rem 0; resize: both; overflow: hidden; width: ${width}px; height: ${height}px; border: 2px dashed transparent;">
+      <div class="video-container" style="position: relative; margin: 1rem 0; resize: both; overflow: hidden; width: ${width}px; height: ${height}px; border: 2px dashed #ccc;">
         <iframe 
           src="${embedUrl}" 
           width="100%" 
@@ -311,30 +289,12 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
           title="${title || "Video"}"
           style="display: block;">
         </iframe>
-        <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: var(--accent-primary); cursor: se-resize; opacity: 0; transition: opacity 0.2s;"></div>
+        <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #666; cursor: se-resize;"></div>
       </div>
     `
 
       insertHTML(videoHTML)
       setShowVideoModal(false)
-    },
-    [insertHTML],
-  )
-
-  // Insert image
-  const insertImage = useCallback(
-    (imageData: ImageData) => {
-      const { url, width, height, alt, title } = imageData
-
-      const imageHTML = `
-      <div class="image-container" style="position: relative; display: inline-block; margin: 1rem 0; resize: both; overflow: hidden; width: ${width}px; height: ${height}px; border: 2px dashed transparent;">
-        <img src="${url}" alt="${alt || "Image"}" title="${title || ""}" style="width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px;" />
-        <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: var(--accent-primary); cursor: se-resize; opacity: 0; transition: opacity 0.2s;"></div>
-      </div>
-    `
-
-      insertHTML(imageHTML)
-      setShowImageModal(false)
     },
     [insertHTML],
   )
@@ -402,7 +362,19 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
         const url = prompt("Enter URL:")
         if (url) execCommand("createLink", url)
       },
-      image: () => setShowImageModal(true),
+      image: () => {
+        const url = prompt("Enter image URL:")
+        if (url) {
+          const imageHTML = `
+      <div class="image-container" style="position: relative; display: inline-block; margin: 1rem 0; resize: both; overflow: hidden; max-width: 100%;">
+        <img src="${url}" alt="Image" style="width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px;" 
+             onload="this.parentElement.style.width = Math.min(this.naturalWidth, 600) + 'px'; this.parentElement.style.height = Math.min(this.naturalHeight, 400) + 'px';" />
+        <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #666; cursor: se-resize; opacity: 0; transition: opacity 0.2s;"></div>
+      </div>
+    `
+          insertHTML(imageHTML)
+        }
+      },
       table: () => setShowTableModal(true),
       video: () => setShowVideoModal(true),
       emoji: () => setShowEmojiPicker(true),
@@ -440,14 +412,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
       fullscreen: () => {
         setIsFullscreen(!isFullscreen)
       },
-      // Custom tool actions
-      ...customTools.reduce(
-        (acc, tool) => {
-          acc[tool.id] = () => tool.action(editorRef.current)
-          return acc
-        },
-        {} as Record<string, () => void>,
-      ),
     }),
     [
       execCommand,
@@ -460,7 +424,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
       isDarkMode,
       onDarkModeChange,
       isFullscreen,
-      customTools,
     ],
   )
 
@@ -694,7 +657,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
           }
         }}
         toolbarOptions={toolbarOptions}
-        customTools={customTools}
         className={toolbarClassName}
         canUndo={historyIndex > 0}
         canRedo={historyIndex < history.length - 1}
@@ -704,7 +666,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
         onEmojiPicker={() => setShowEmojiPicker(true)}
         activeDropdown={activeDropdown}
         onDropdownChange={setActiveDropdown}
-        editorRef={editorRef}
       />
 
       <div className="scrivly-editor-container" style={{ maxHeight: isFullscreen ? "100vh" : maxHeight, minHeight }}>
@@ -823,15 +784,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
       {showTableModal && <TableModal onCreateTable={createTable} onClose={() => setShowTableModal(false)} />}
 
       {showVideoModal && <VideoModal onInsertVideo={insertVideo} onClose={() => setShowVideoModal(false)} />}
-
-      {showImageModal && (
-        <ImageModal
-          onInsertImage={insertImage}
-          onClose={() => setShowImageModal(false)}
-          allowUpload={allowImageUpload}
-          onImageUpload={onImageUpload}
-        />
-      )}
 
       {showColorPicker && (
         <ColorPicker

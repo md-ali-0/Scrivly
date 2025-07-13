@@ -36,14 +36,29 @@ import {
   Minimize,
   ChevronDown,
 } from "lucide-react"
-import type { ToolbarOption, BlockFormat, FontSize, FontFamily, ToolbarProps } from "../types/editor"
+import type { ToolbarOption, BlockFormat, FontSize, FontFamily } from "../types/editor"
+
+export interface ToolbarProps {
+  isActive: Record<string, boolean>
+  currentBlock: BlockFormat
+  onAction: (action: string, value?: any) => void
+  toolbarOptions: ToolbarOption[]
+  className?: string
+  canUndo?: boolean
+  canRedo?: boolean
+  isDarkMode?: boolean
+  isFullscreen?: boolean
+  onColorPicker?: (type: "text" | "background") => void
+  onEmojiPicker?: () => void
+  activeDropdown?: string | null
+  onDropdownChange?: (dropdown: string | null) => void
+}
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   isActive,
   currentBlock,
   onAction,
   toolbarOptions,
-  customTools = [],
   className = "",
   canUndo = false,
   canRedo = false,
@@ -53,8 +68,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onEmojiPicker,
   activeDropdown,
   onDropdownChange,
-  editorRef,
 }) => {
+  // Remove local dropdown states and use the managed ones
+  // const [showFormatDropdown, setShowFormatDropdown] = useState(false)
+  // const [showFontSizeDropdown, setShowFontSizeDropdown] = useState(false)
+  // const [showFontFamilyDropdown, setShowFontFamilyDropdown] = useState(false)
+
   const buttonConfig = {
     bold: { icon: Bold, label: "Bold", shortcut: "Ctrl+B" },
     italic: { icon: Italic, label: "Italic", shortcut: "Ctrl+I" },
@@ -129,17 +148,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     "Impact",
   ]
 
-  // Group custom tools by their group property
-  const groupedCustomTools = customTools.reduce(
-    (acc, tool) => {
-      const group = tool.group || "custom"
-      if (!acc[group]) acc[group] = []
-      acc[group].push(tool)
-      return acc
-    },
-    {} as Record<string, typeof customTools>,
-  )
-
   const buttonGroups = [
     ["undo", "redo"],
     ["bold", "italic", "underline", "strikethrough", "subscript", "superscript"],
@@ -151,30 +159,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     ["indent", "outdent"],
     ["table", "link", "image", "video", "emoji"],
     ["clear", "darkMode", "fullscreen"],
-    // Add custom tool groups
-    ...Object.keys(groupedCustomTools).map((group) => groupedCustomTools[group].map((tool) => tool.id)),
   ]
 
   const renderButton = (option: string) => {
-    if (!toolbarOptions.includes(option as ToolbarOption) && option !== "customTool") return null
-
-    // Handle custom tools
-    const customTool = customTools.find((tool) => tool.id === option)
-    if (customTool) {
-      const Icon = customTool.icon
-      const active = isActive[customTool.id]
-      return (
-        <button
-          key={customTool.id}
-          type="button"
-          className={`toolbar-button ${active ? "active" : ""}`}
-          onClick={() => onAction(customTool.id)}
-          title={customTool.tooltip}
-        >
-          <Icon size={16} />
-        </button>
-      )
-    }
+    if (!toolbarOptions.includes(option as ToolbarOption)) return null
 
     const config = buttonConfig[option as keyof typeof buttonConfig]
     if (!config) return null
