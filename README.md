@@ -46,19 +46,19 @@ A powerful, feature-rich rich text editor for React with TypeScript support. Bui
 ## 📦 Installation
 
 \`\`\`bash
-npm install scrivly-editor
+npm install scrivly
 # or
-yarn add scrivly-editor
+yarn add scrivly
 # or
-pnpm add scrivly-editor
+pnpm add scrivly
 \`\`\`
 
 ## 🚀 Quick Start
 
 \`\`\`tsx
 import React, { useState } from 'react'
-import { ScrivlyEditor } from 'scrivly-editor'
-import 'scrivly-editor/dist/style.css' // Import styles
+import { ScrivlyEditor } from 'scrivly'
+import 'scrivly/dist/style.css' // Import styles
 
 function App() {
   const [content, setContent] = useState('<p>Start writing...</p>')
@@ -317,10 +317,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 📧 Email: support@scrivly-editor.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/scrivly-editor/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/scrivly-editor/discussions)
+- 📧 Email: md.ali.office@gmail.com
+- 🐛 Issues: [GitHub Issues](https://github.com/md-ali-0/Scrivly/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/md-ali-0/Scrivly/discussions)
 
 ---
 
-Made with ❤️ by the Scrivly Editor team
+Made with ❤️ by Ali
