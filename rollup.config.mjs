@@ -25,29 +25,24 @@ export default [
             },
         ],
         plugins: [
-            peerDepsExternal(),
+            peerDepsExternal(), // ✅ Exclude peer deps from the bundle
             resolve({
                 browser: true,
                 preferBuiltins: false,
             }),
             commonjs(),
             typescript({
-                tsconfig: "./tsconfig.build.json",
+                tsconfig: "./tsconfig.build.json", // Should include "jsx": "react-jsx"
                 declaration: true,
                 declarationDir: "dist",
-                exclude: [
-                    "**/*.test.*",
-                    "**/*.stories.*",
-                    "app/**/*.ts",
-                    "app/**/*.tsx",
-                ],
+                exclude: ["**/*.test.*", "**/*.stories.*", "app/**/*"],
             }),
             babel({
                 extensions: [".js", ".jsx", ".ts", ".tsx"],
                 babelHelpers: "bundled",
                 presets: [
                     ["@babel/preset-env", { targets: "defaults" }],
-                    "@babel/preset-react",
+                    ["@babel/preset-react", { runtime: "automatic" }], // ✅ Use new JSX transform
                     "@babel/preset-typescript",
                 ],
                 exclude: "node_modules/**",
@@ -65,8 +60,7 @@ export default [
             }),
             terser(),
         ],
-        external: ["react", "react-dom", "lucide-react"],
-        logLevel: "debug",
+        external: ["react", "react-dom", "lucide-react"], // ✅ Don't bundle these
     },
     {
         input: "dist/index.d.ts",
