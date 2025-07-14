@@ -1,6 +1,6 @@
 {
     "name": "scrivly",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "description": "A powerful, feature-rich rich text editor for React with TypeScript support",
     "main": "dist/index.js",
     "module": "dist/index.esm.js",
@@ -52,7 +52,7 @@
     "bugs": {
         "url": "https://github.com/md-ali-0/Scrivly/issues"
     },
-    "homepage": "https://github.com/md-ali-0/Scrivly#readme",
+    "homepage": "https://scrivly.vercel.app",
     "peerDependencies": {
         "react": ">=16.8.0",
         "react-dom": ">=16.8.0"
