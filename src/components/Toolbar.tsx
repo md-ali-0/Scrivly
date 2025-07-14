@@ -1,13 +1,6 @@
 "use client"
 
 import {
-  AlignCenter,
-  AlignJustify,
-  AlignLeft,
-  AlignRight,
-  Bold,
-  CheckSquare,
-  ChevronDown,
   Code,
   Eraser,
   FileCode,
@@ -36,8 +29,10 @@ import {
   Underline,
   Video,
 } from "lucide-react";
+
 import type React from "react";
 import type { BlockFormat, FontFamily, FontSize, ToolbarOption, ToolbarProps } from "../types/editor";
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, CheckSquare, ChevronDown } from "./icons";
 
 export type ToolbarConfig = {
   icon: LucideIcon;

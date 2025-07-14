@@ -66,7 +66,7 @@ pnpm add scrivly
 ````tsx
 import React, { useState } from 'react'
 import { ScrivlyEditor } from 'scrivly'
-import 'scrivly/dist/style.css' // Import styles
+import 'scrivly/dist/styles.css' // Import styles
 
 function App() {
   const [content, setContent] = useState('<p>Start writing...</p>')
