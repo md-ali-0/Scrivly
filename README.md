@@ -6,6 +6,8 @@ A powerful, feature-rich rich text editor for React with TypeScript support. Bui
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![Screenshot of Scrivly](https://github.com/md-ali-0/Scrivly/raw/main/public/2025-07-14_09-59.png)
+
 ## ✨ Features
 
 ### 🎨 Rich Formatting
