@@ -389,7 +389,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ### Development Setup
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/yourusername/scrivly.git`
+2. Clone your fork: `git clone https://github.com/md-ali-0/scrivly.git`
 3. Install dependencies: `npm install`
 4. Start development server: `npm run dev`
 5. Make your changes
@@ -420,8 +420,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 📧 **Email**: md.ali.office@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/md-ali-0/Scrivly/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/md-ali-0/Scrivly/discussions)
-- 📖 **Documentation**: [Full Documentation](https://scrivly-docs.vercel.app)
-- 🎮 **Playground**: [Try it online](https://scrivly-playground.vercel.app)
+- 📖 **Documentation**: [Full Documentation](https://scrivly.vercel.app)
+- 🎮 **Playground**: [Try it online](https://scrivly.vercel.app)
 
 ## 🗺️ Roadmap
 
