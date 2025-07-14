@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { X } from "lucide-react"
+import { XIcon } from "./icons"
 
 interface ColorPickerProps {
   type: "text" | "background"
@@ -55,7 +55,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ type, onColorSelect, o
         <div className="modal-header">
           <h3>{type === "text" ? "Text Color" : "Background Color"}</h3>
           <button onClick={onClose} className="close-button">
-            <X size={16} />
+            <XIcon size={16} />
           </button>
         </div>
 

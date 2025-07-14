@@ -2,6 +2,7 @@
 
 import {
   Code,
+  CustomIcon,
   Eraser,
   FileCode,
   ImageIcon,
@@ -10,7 +11,6 @@ import {
   Link,
   List,
   ListOrdered,
-  LucideIcon,
   Maximize,
   Minimize,
   Moon,
@@ -28,14 +28,14 @@ import {
   Type,
   Underline,
   Video,
-} from "lucide-react";
+} from "./icons";
 
 import type React from "react";
 import type { BlockFormat, FontFamily, FontSize, ToolbarOption, ToolbarProps } from "../types/editor";
 import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, CheckSquare, ChevronDown } from "./icons";
 
 export type ToolbarConfig = {
-  icon: LucideIcon;
+  icon: CustomIcon;
   label: string;
   shortcut?: string;
 };
