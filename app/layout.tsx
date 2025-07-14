@@ -65,7 +65,7 @@ export const metadata: Metadata = {
         title: "Scrivly Editor - Powerful Rich Text Editor for React",
         description:
             "A powerful, feature-rich rich text editor for React with TypeScript support. Built with modern React patterns and designed for professional applications.",
-        images: ["/twitter-image.png"],
+        images: ["/og-image.png"],
         creator: "@your_twitter_handle",
     },
     robots: {
