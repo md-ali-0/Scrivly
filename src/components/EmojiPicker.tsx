@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { X } from "lucide-react"
+import { XIcon } from "./icons"
 
 interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void
@@ -174,7 +174,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect, onClose
         <div className="modal-header">
           <h3>Insert Emoji</h3>
           <button onClick={onClose} className="close-button">
-            <X size={16} />
+            <XIcon size={16} />
           </button>
         </div>
 

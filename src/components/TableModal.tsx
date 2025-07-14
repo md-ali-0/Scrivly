@@ -2,8 +2,8 @@
 
 import type React from "react"
 import { useState } from "react"
-import { X } from "lucide-react"
 import type { TableData } from "../types/editor"
+import { XIcon } from "./icons"
 
 interface TableModalProps {
   onCreateTable: (tableData: TableData) => void
@@ -28,7 +28,7 @@ export const TableModal: React.FC<TableModalProps> = ({ onCreateTable, onClose }
         <div className="modal-header">
           <h3>Insert Table</h3>
           <button onClick={onClose} className="close-button">
-            <X size={20} />
+            <XIcon size={20} />
           </button>
         </div>
 

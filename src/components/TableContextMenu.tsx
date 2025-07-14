@@ -1,7 +1,7 @@
 "use client"
 
+import { Plus, Table, Trash2 } from "lucide-react"
 import type React from "react"
-import { Plus, Trash2, Table } from "lucide-react"
 
 interface TableContextMenuProps {
   show: boolean

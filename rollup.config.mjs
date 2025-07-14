@@ -60,7 +60,7 @@ export default [
             }),
             terser(),
         ],
-        external: ["react", "react-dom", "lucide-react"], // ✅ Don't bundle these
+        external: ["react", "react-dom"],
     },
     {
         input: "dist/index.d.ts",

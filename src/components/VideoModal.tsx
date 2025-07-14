@@ -2,8 +2,8 @@
 
 import type React from "react"
 import { useState } from "react"
-import { X } from "lucide-react"
 import type { VideoData } from "../types/editor"
+import { XIcon } from "./icons"
 
 interface VideoModalProps {
   onInsertVideo: (videoData: VideoData) => void
@@ -35,7 +35,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({ onInsertVideo, onClose }
         <div className="modal-header">
           <h3>Insert Video</h3>
           <button onClick={onClose} className="close-button">
-            <X size={20} />
+            <XIcon size={20} />
           </button>
         </div>
 
