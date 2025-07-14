@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export default function Home() {
     const [content, setContent] = useState(`
-    <h1>🚀 Scrivly Editor Pro - Ultimate Rich Text Editor</h1>
+    <h1>🚀 Scrivly Editor v2.0 - Ultimate Rich Text Editor</h1>
     <p>Welcome to the most feature-rich rich text editor for React! This editor includes:</p>
     
     <h2>✨ Core Features</h2>
