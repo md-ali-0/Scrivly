@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { ScrivlyEditor } from "@/components/ScrivlyEditor"
-import { useState } from "react"
+import { ScrivlyEditor } from "@/src/components/ScrivlyEditor";
+import { useState } from "react";
 
 export default function Home() {
-  const [content, setContent] = useState(`
+    const [content, setContent] = useState(`
     <h1>🚀 Scrivly Editor Pro - Ultimate Rich Text Editor</h1>
     <p>Welcome to the most feature-rich rich text editor for React! This editor includes:</p>
     
@@ -52,87 +52,90 @@ export default function Home() {
       <li><strong>Ctrl+Z</strong> - Undo</li>
       <li><strong>Ctrl+Shift+Z</strong> - Redo</li>
     </ul>
-  `)
+  `);
 
-  const [isDarkMode, setIsDarkMode] = useState(false)
+    const [isDarkMode, setIsDarkMode] = useState(false); 
 
-  return (
-    <div className="app-container">
-      <div className="header">
-        <h1>🎯 Scrivly Editor Pro</h1>
-        <p>The Ultimate Rich Text Editor with Dark Mode & Advanced Features</p>
-      </div>
+    return (
+        <div className="app-container">
+            <div className="header">
+                <h1>🎯 Scrivly Editor</h1>
+                <p>
+                    The Ultimate Rich Text Editor with Dark Mode & Advanced
+                    Features
+                </p>
+            </div>
 
-      <div className="editor-wrapper">
-        <ScrivlyEditor
-          value={content}
-          onChange={setContent}
-          placeholder="Start creating something amazing..."
-          maxHeight="700px"
-          minHeight="400px"
-          darkMode={isDarkMode}
-          onDarkModeChange={setIsDarkMode}
-          autoSave={true}
-          autoSaveInterval={3000}
-          showWordCount={true}
-          showCharCount={true}
-          spellCheck={true}
-        />
-      </div>
+            <div className="editor-wrapper">
+                <ScrivlyEditor
+                    value={content}
+                    onChange={setContent}
+                    placeholder="Start creating something amazing..."
+                    maxHeight="700px"
+                    minHeight="400px"
+                    darkMode={isDarkMode}
+                    onDarkModeChange={setIsDarkMode}
+                    autoSave={true}
+                    autoSaveInterval={3000}
+                    showWordCount={true}
+                    showCharCount={true}
+                    spellCheck={true}
+                />
+            </div>
 
-      <div className="features-showcase">
-        <h2>🎁 New Features Added</h2>
-        <div className="feature-grid">
-          <div className="feature-card">
-            <h3>🌙 Dark Mode</h3>
-            <p>Beautiful dark theme with smooth transitions</p>
-          </div>
-          <div className="feature-card">
-            <h3>📊 Advanced Tables</h3>
-            <p>Create, resize, add/remove rows and columns</p>
-          </div>
-          <div className="feature-card">
-            <h3>🎬 Video Support</h3>
-            <p>Embed YouTube, Vimeo videos with resize handles</p>
-          </div>
-          <div className="feature-card">
-            <h3>🎨 Color Picker</h3>
-            <p>Text and background color customization</p>
-          </div>
-          <div className="feature-card">
-            <h3>📝 Format Selector</h3>
-            <p>Dropdown for H1, H2, H3, paragraphs, and more</p>
-          </div>
-          <div className="feature-card">
-            <h3>😊 Emoji Picker</h3>
-            <p>Insert emojis with categorized picker</p>
-          </div>
-          <div className="feature-card">
-            <h3>🔤 Typography</h3>
-            <p>Font family and size selection</p>
-          </div>
-          <div className="feature-card">
-            <h3>📱 Responsive</h3>
-            <p>Works perfectly on all devices</p>
-          </div>
-          <div className="feature-card">
-            <h3>⚡ Auto-save</h3>
-            <p>Automatic content saving every 3 seconds</p>
-          </div>
-          <div className="feature-card">
-            <h3>🔍 Fullscreen</h3>
-            <p>Distraction-free writing mode</p>
-          </div>
-          <div className="feature-card">
-            <h3>✅ Checklists</h3>
-            <p>Interactive todo lists and checkboxes</p>
-          </div>
-          <div className="feature-card">
-            <h3>🎯 TypeScript</h3>
-            <p>Full TypeScript support with proper types</p>
-          </div>
+            <div className="features-showcase">
+                <h2>🎁 New Features Added</h2>
+                <div className="feature-grid">
+                    <div className="feature-card">
+                        <h3>🌙 Dark Mode</h3>
+                        <p>Beautiful dark theme with smooth transitions</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>📊 Advanced Tables</h3>
+                        <p>Create, resize, add/remove rows and columns</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>🎬 Video Support</h3>
+                        <p>Embed YouTube, Vimeo videos with resize handles</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>🎨 Color Picker</h3>
+                        <p>Text and background color customization</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>📝 Format Selector</h3>
+                        <p>Dropdown for H1, H2, H3, paragraphs, and more</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>😊 Emoji Picker</h3>
+                        <p>Insert emojis with categorized picker</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>🔤 Typography</h3>
+                        <p>Font family and size selection</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>📱 Responsive</h3>
+                        <p>Works perfectly on all devices</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>⚡ Auto-save</h3>
+                        <p>Automatic content saving every 3 seconds</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>🔍 Fullscreen</h3>
+                        <p>Distraction-free writing mode</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>✅ Checklists</h3>
+                        <p>Interactive todo lists and checkboxes</p>
+                    </div>
+                    <div className="feature-card">
+                        <h3>🎯 TypeScript</h3>
+                        <p>Full TypeScript support with proper types</p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  )
+    );
 }

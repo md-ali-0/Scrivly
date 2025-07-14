@@ -3,12 +3,12 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
-  BlockFormat,
-  FontFamily,
-  FontSize,
-  ScrivlyEditorProps,
-  TableData,
-  VideoData,
+    BlockFormat,
+    FontFamily,
+    FontSize,
+    ScrivlyEditorProps,
+    TableData,
+    VideoData,
 } from "../types/editor";
 import { ColorPicker } from "./ColorPicker";
 import { EmojiPicker } from "./EmojiPicker";
