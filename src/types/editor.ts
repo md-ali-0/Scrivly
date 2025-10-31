@@ -34,6 +34,9 @@ export type ToolbarOption =
   | "redo"
   | "fullscreen"
   | "darkMode"
+  | "highlight"
+  | "search"
+  | "export"
   | "customTool"
 
 export type BlockFormat = "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote" | "pre" | "div"

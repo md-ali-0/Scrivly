@@ -651,3 +651,61 @@ export const XIcon = ({ size = 16, ...props }: CustomIcon) => (
         <path d="M18 6 6 18M6 6l12 12"></path>
     </svg>
 );
+
+export const Highlighter = ({ size = 16, ...props }: CustomIcon) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        className="lucide lucide-highlighter-icon lucide-highlighter"
+        viewBox="0 0 24 24"
+        {...props}
+    >
+        <path d="m9 11-6 6v3h9l3-3" />
+        <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" />
+    </svg>
+);
+
+export const Search = ({ size = 16, ...props }: CustomIcon) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        className="lucide lucide-search-icon lucide-search"
+        viewBox="0 0 24 24"
+        {...props}
+    >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+    </svg>
+);
+
+export const Download = ({ size = 16, ...props }: CustomIcon) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        className="lucide lucide-download-icon lucide-download"
+        viewBox="0 0 24 24"
+        {...props}
+    >
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" x2="12" y1="15" y2="3" />
+    </svg>
+);

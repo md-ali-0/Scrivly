@@ -12,6 +12,7 @@ import type {
 } from "../types/editor";
 import { ColorPicker } from "./ColorPicker";
 import { EmojiPicker } from "./EmojiPicker";
+import { SearchModal } from "./SearchModal";
 import { TableModal } from "./TableModal";
 import { Toolbar } from "./Toolbar";
 import { VideoModal } from "./VideoModal";
@@ -68,6 +69,8 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
     autoSave = false,
     autoSaveInterval = 5000,
     spellCheck = true,
+    allowImageUpload = false,
+    onImageUpload,
 }) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const [isActive, setIsActive] = useState<Record<string, boolean>>({});
@@ -80,6 +83,7 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showTableModal, setShowTableModal] = useState(false);
     const [showVideoModal, setShowVideoModal] = useState(false);
+    const [showSearchModal, setShowSearchModal] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState<
         "text" | "background" | null
     >(null);
@@ -269,14 +273,41 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
     const createTable = useCallback(
         (tableData: TableData) => {
             const { rows, cols } = tableData;
-            let tableHTML =
-                '<table class="editor-table" style="border-collapse: collapse; width: 100%; margin: 1rem 0;">';
+      
+            // Create a more semantic and accessible table with optional header row
+            let tableHTML = `<table class="scrivly-table" style="
+              border-collapse: collapse; 
+              width: 100%; 
+              margin: 1rem 0; 
+              background: var(--bg-primary); 
+              border-radius: 6px; 
+              overflow: hidden; 
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            ">`;
 
             for (let i = 0; i < rows; i++) {
                 tableHTML += "<tr>";
                 for (let j = 0; j < cols; j++) {
                     const cellContent = tableData.data?.[i]?.[j] || "";
-                    tableHTML += `<td style="border: 1px solid #ccc; padding: 8px; min-width: 100px;" contenteditable="true">${cellContent}</td>`;
+                    
+                    // First row as header row
+                    if (i === 0) {
+                        tableHTML += `<th style="
+                          border: 1px solid var(--border-color); 
+                          padding: 12px; 
+                          min-width: 100px;
+                          background: var(--bg-tertiary);
+                          font-weight: 600;
+                          outline: none;
+                        " contenteditable="true">${cellContent || `Header ${j + 1}`}</th>`;
+                    } else {
+                        tableHTML += `<td style="
+                          border: 1px solid var(--border-color); 
+                          padding: 12px; 
+                          min-width: 100px;
+                          outline: none;
+                        " contenteditable="true">${cellContent}</td>`;
+                    }
                 }
                 tableHTML += "</tr>";
             }
@@ -356,6 +387,24 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                     console.warn("Could not apply code formatting");
                 }
             },
+            highlight: () => {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return;
+                const range = selection.getRangeAt(0);
+                if (range.collapsed) return;
+
+                const mark = document.createElement("mark");
+                mark.style.backgroundColor = "#fef08a";
+                mark.style.padding = "0.1rem 0.2rem";
+                mark.style.borderRadius = "3px";
+
+                try {
+                    range.surroundContents(mark);
+                    handleInput();
+                } catch (e) {
+                    console.warn("Could not apply highlight formatting");
+                }
+            },
             formatBlock: (format: BlockFormat) =>
                 execCommand("formatBlock", format),
             blockquote: () => execCommand("formatBlock", "blockquote"),
@@ -390,24 +439,79 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
             },
 
             fontFamily: (family: FontFamily) => execCommand("fontName", family),
-            textColor: (color: string) => execCommand("foreColor", color),
-            backgroundColor: (color: string) => execCommand("backColor", color),
+            textColor: (color: string) => {
+                if (showColorPicker === "text") {
+                    // If already showing text color picker, close it
+                    setShowColorPicker(null);
+                } else {
+                    // Show text color picker dropdown
+                    setShowColorPicker("text");
+                }
+            },
+            backgroundColor: (color: string) => {
+                if (showColorPicker === "background") {
+                    // If already showing background color picker, close it
+                    setShowColorPicker(null);
+                } else {
+                    // Show background color picker dropdown
+                    setShowColorPicker("background");
+                }
+            },
             link: () => {
                 const url = prompt("Enter URL:");
                 if (url) execCommand("createLink", url);
             },
             image: () => {
+                // Show image dropdown options
+                if (activeDropdown === "image") {
+                    setActiveDropdown(null);
+                } else {
+                    setActiveDropdown("image");
+                }
+            },
+            imageUrl: () => {
                 const url = prompt("Enter image URL:");
                 if (url) {
                     const imageHTML = `
-      <div class="image-container" style="position: relative; display: inline-block; margin: 1rem 0; resize: both; overflow: hidden; max-width: 100%;">
-        <img src="${url}" alt="Image" style="width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px;" 
-             onload="this.parentElement.style.width = Math.min(this.naturalWidth, 600) + 'px'; this.parentElement.style.height = Math.min(this.naturalHeight, 400) + 'px';" />
-        <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #666; cursor: se-resize; opacity: 0; transition: opacity 0.2s;"></div>
-      </div>
-    `;
+            <div class="image-container" style="position: relative; display: inline-block; margin: 1rem 0; resize: both; overflow: hidden; max-width: 100%;">
+              <img src="${url}" alt="Image" style="width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px;" 
+                   onload="this.parentElement.style.width = Math.min(this.naturalWidth, 600) + 'px'; this.parentElement.style.height = Math.min(this.naturalHeight, 400) + 'px';" />
+              <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #666; cursor: se-resize; opacity: 0; transition: opacity 0.2s;"></div>
+            </div>
+          `;
                     insertHTML(imageHTML);
                 }
+                setActiveDropdown(null);
+            },
+            imageUpload: async (file: File) => {
+                if (allowImageUpload && onImageUpload) {
+                    try {
+                        const url = await onImageUpload(file);
+                        const imageHTML = `
+                          <div class="image-container" style="position: relative; display: inline-block; margin: 1rem 0; resize: both; overflow: hidden; max-width: 100%;">
+                            <img src="${url}" alt="Image" style="width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px;" 
+                                 onload="this.parentElement.style.width = Math.min(this.naturalWidth, 600) + 'px'; this.parentElement.style.height = Math.min(this.naturalHeight, 400) + 'px';" />
+                            <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #666; cursor: se-resize; opacity: 0; transition: opacity 0.2s;"></div>
+                          </div>
+                        `;
+                        insertHTML(imageHTML);
+                    } catch (error) {
+                        console.error("Image upload failed:", error);
+                        alert("Failed to upload image. Please try again.");
+                    }
+                } else {
+                    // Fallback to creating object URL
+                    const url = URL.createObjectURL(file);
+                    const imageHTML = `
+                          <div class="image-container" style="position: relative; display: inline-block; margin: 1rem 0; resize: both; overflow: hidden; max-width: 100%;">
+                            <img src="${url}" alt="Image" style="width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 8px;" 
+                                 onload="this.parentElement.style.width = Math.min(this.naturalWidth, 600) + 'px'; this.parentElement.style.height = Math.min(this.naturalHeight, 400) + 'px';" />
+                            <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #666; cursor: se-resize; opacity: 0; transition: opacity 0.2s;"></div>
+                          </div>
+                        `;
+                    insertHTML(imageHTML);
+                }
+                setActiveDropdown(null);
             },
             table: () => setShowTableModal(true),
             video: () => setShowVideoModal(true),
@@ -449,6 +553,24 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
             fullscreen: () => {
                 setIsFullscreen(!isFullscreen);
             },
+            search: () => {
+                setShowSearchModal(true);
+            },
+            export: () => {
+                // Export functionality
+                if (editorRef.current) {
+                    const content = editorRef.current.innerHTML;
+                    const blob = new Blob([content], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'scrivly-content.html';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+            },
         }),
         [
             execCommand,
@@ -461,6 +583,11 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
             isDarkMode,
             onDarkModeChange,
             isFullscreen,
+            showColorPicker,
+            activeDropdown,
+            allowImageUpload,
+            onImageUpload,
+            insertHTML,
         ]
     );
 
@@ -494,6 +621,26 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
     // Handle key shortcuts
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {
+            // Accessibility shortcuts
+            if (e.altKey) {
+                switch (e.key) {
+                    case "t": // Alt+T for toolbar focus
+                        e.preventDefault();
+                        const firstButton = document.querySelector('.toolbar-button');
+                        if (firstButton instanceof HTMLElement) {
+                            firstButton.focus();
+                        }
+                        break;
+                    case "e": // Alt+E for editor focus
+                        e.preventDefault();
+                        if (editorRef.current) {
+                            editorRef.current.focus();
+                        }
+                        break;
+                }
+            }
+            
+            // Formatting shortcuts
             if (e.ctrlKey || e.metaKey) {
                 switch (e.key) {
                     case "b":
@@ -520,10 +667,68 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                         e.preventDefault();
                         toolbarActions.link();
                         break;
+                    case "h": // Ctrl+H for highlight
+                        e.preventDefault();
+                        toolbarActions.highlight();
+                        break;
+                    case "f": // Ctrl+F for search
+                        e.preventDefault();
+                        toolbarActions.search();
+                        break;
+                }
+            }
+            
+            // Table navigation shortcuts
+            if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) {
+                // Check if we're inside a table
+                const selection = window.getSelection();
+                if (selection && selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const tableCell = range.startContainer.parentElement?.closest('td, th');
+                    
+                    if (tableCell) {
+                        e.preventDefault();
+                        
+                        // Handle Shift+Tab for moving to previous cell
+                        if (e.shiftKey) {
+                            // Find previous cell
+                            const prevCell = getPreviousTableCell(tableCell);
+                            if (prevCell) {
+                                const range = document.createRange();
+                                range.selectNodeContents(prevCell);
+                                range.collapse(false);
+                                selection.removeAllRanges();
+                                selection.addRange(range);
+                            }
+                        } else {
+                            // Find next cell
+                            const nextCell = getNextTableCell(tableCell);
+                            if (nextCell) {
+                                const range = document.createRange();
+                                range.selectNodeContents(nextCell);
+                                range.collapse(false);
+                                selection.removeAllRanges();
+                                selection.addRange(range);
+                            }
+                        }
+                    }
+                }
+                
+                // Handle indent/outdent in regular content
+                if (document.activeElement === editorRef.current) {
+                    e.preventDefault();
+                    // Properly handle indent/outdent with Tab/Shift+Tab
+                    if (e.shiftKey) {
+                        // Shift+Tab - outdent
+                        toolbarActions.outdent();
+                    } else {
+                        // Tab - indent
+                        toolbarActions.indent();
+                    }
                 }
             }
         },
-        [toolbarActions]
+        [toolbarActions, editorRef]
     );
 
     // Handle table operations
@@ -545,7 +750,7 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                         for (let i = 0; i < colCount; i++) {
                             const cell = newRow.insertCell();
                             cell.style.cssText =
-                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px;";
+                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px; outline: none;";
                             cell.contentEditable = "true";
                             cell.innerHTML = "&nbsp;";
                         }
@@ -560,7 +765,7 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                         for (let i = 0; i < colCount; i++) {
                             const cell = newRow.insertCell();
                             cell.style.cssText =
-                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px;";
+                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px; outline: none;";
                             cell.contentEditable = "true";
                             cell.innerHTML = "&nbsp;";
                         }
@@ -570,7 +775,7 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                         for (let i = 0; i < colCount; i++) {
                             const cell = newRow.insertCell();
                             cell.style.cssText =
-                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px;";
+                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px; outline: none;";
                             cell.contentEditable = "true";
                             cell.innerHTML = "&nbsp;";
                         }
@@ -578,14 +783,14 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                     break;
 
                 case "addColumnLeft":
-                    if (cell) {
-                        const cellIndex = Array.from(row!.cells).indexOf(
+                    if (cell && row) {
+                        const cellIndex = Array.from(row.cells).indexOf(
                             cell as HTMLTableCellElement
                         );
                         Array.from(table.rows).forEach((row) => {
                             const newCell = row.insertCell(cellIndex);
                             newCell.style.cssText =
-                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px;";
+                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px; outline: none;";
                             newCell.contentEditable = "true";
                             newCell.innerHTML = "&nbsp;";
                         });
@@ -594,14 +799,14 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
 
                 case "addColumnRight":
                 case "addColumn":
-                    if (cell) {
-                        const cellIndex = Array.from(row!.cells).indexOf(
+                    if (cell && row) {
+                        const cellIndex = Array.from(row.cells).indexOf(
                             cell as HTMLTableCellElement
                         );
                         Array.from(table.rows).forEach((row) => {
                             const newCell = row.insertCell(cellIndex + 1);
                             newCell.style.cssText =
-                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px;";
+                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px; outline: none;";
                             newCell.contentEditable = "true";
                             newCell.innerHTML = "&nbsp;";
                         });
@@ -609,7 +814,7 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                         Array.from(table.rows).forEach((row) => {
                             const newCell = row.insertCell();
                             newCell.style.cssText =
-                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px;";
+                                "border: 1px solid var(--border-color); padding: 12px; min-width: 100px; outline: none;";
                             newCell.contentEditable = "true";
                             newCell.innerHTML = "&nbsp;";
                         });
@@ -618,15 +823,19 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
 
                 case "deleteRow":
                     if (row && table.rows.length > 1) {
-                        row.remove();
+                        // Don't allow deleting the last row
+                        if (table.rows.length > 1) {
+                            row.remove();
+                        }
                     }
                     break;
 
                 case "deleteColumn":
-                    if (cell) {
-                        const cellIndex = Array.from(row!.cells).indexOf(
+                    if (cell && row) {
+                        const cellIndex = Array.from(row.cells).indexOf(
                             cell as HTMLTableCellElement
                         );
+                        // Don't allow deleting the last column
                         if (table.rows[0]?.cells.length > 1) {
                             Array.from(table.rows).forEach((row) => {
                                 if (row.cells[cellIndex]) {
@@ -636,21 +845,29 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                         }
                     }
                     break;
+                    
+                case "deleteTable":
+                    if (confirm("Are you sure you want to delete this table?")) {
+                        table.remove();
+                    }
+                    break;
             }
 
             handleInput();
 
             // Add visual feedback
-            const cells = table.querySelectorAll("td, th");
-            cells.forEach((cell) => {
-                (cell as HTMLElement).style.transition =
-                    "background-color 0.3s ease";
-                (cell as HTMLElement).style.backgroundColor =
-                    "var(--accent-primary)";
-                setTimeout(() => {
-                    (cell as HTMLElement).style.backgroundColor = "";
-                }, 300);
-            });
+            if (table) {
+                const cells = table.querySelectorAll("td, th");
+                cells.forEach((cell) => {
+                    (cell as HTMLElement).style.transition =
+                        "background-color 0.3s ease";
+                    (cell as HTMLElement).style.backgroundColor =
+                        "var(--accent-primary)";
+                    setTimeout(() => {
+                        (cell as HTMLElement).style.backgroundColor = "";
+                    }, 300);
+                });
+            }
         },
         [handleInput]
     );
@@ -671,6 +888,14 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
             });
         }
     }, []);
+
+    // Handle table context menu actions
+    const handleTableContextMenuAction = useCallback((action: string) => {
+        if (tableContextMenu.element) {
+            handleTableOperation(action, tableContextMenu.element);
+        }
+        setTableContextMenu({ show: false, x: 0, y: 0, element: null });
+    }, [handleTableOperation, tableContextMenu.element]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -704,6 +929,64 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
         return () =>
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    // Helper function to get the next table cell
+    const getNextTableCell = (currentCell: Element) => {
+      const row = currentCell.parentElement;
+      if (!row) return null;
+      
+      const cells = Array.from(row.children);
+      const currentIndex = cells.indexOf(currentCell);
+      
+      // If not the last cell in the row, return the next cell
+      if (currentIndex < cells.length - 1) {
+        return cells[currentIndex + 1];
+      }
+      
+      // If last cell in the row, go to the first cell of the next row
+      const table = row.parentElement;
+      if (!table) return null;
+      
+      const rows = Array.from(table.children);
+      const currentRowIndex = rows.indexOf(row);
+      
+      if (currentRowIndex < rows.length - 1) {
+        const nextRow = rows[currentRowIndex + 1];
+        return nextRow.firstElementChild;
+      }
+      
+      // If last cell in the table, stay in the current cell
+      return currentCell;
+    };
+
+    // Helper function to get the previous table cell
+    const getPreviousTableCell = (currentCell: Element) => {
+      const row = currentCell.parentElement;
+      if (!row) return null;
+      
+      const cells = Array.from(row.children);
+      const currentIndex = cells.indexOf(currentCell);
+      
+      // If not the first cell in the row, return the previous cell
+      if (currentIndex > 0) {
+        return cells[currentIndex - 1];
+      }
+      
+      // If first cell in the row, go to the last cell of the previous row
+      const table = row.parentElement;
+      if (!table) return null;
+      
+      const rows = Array.from(table.children);
+      const currentRowIndex = rows.indexOf(row);
+      
+      if (currentRowIndex > 0) {
+        const prevRow = rows[currentRowIndex - 1];
+        return prevRow.lastElementChild;
+      }
+      
+      // If first cell in the table, stay in the current cell
+      return currentCell;
+    };
 
     return (
         <div
@@ -778,145 +1061,6 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
             )}
 
             {/* Enhanced Table Context Menu */}
-            {tableContextMenu.show && (
-                <div
-                    className="table-context-menu"
-                    style={{
-                        position: "fixed",
-                        top: tableContextMenu.y,
-                        left: tableContextMenu.x,
-                        zIndex: 10000,
-                    }}
-                >
-                    <div className="context-menu-content">
-                        <button
-                            className="context-menu-item"
-                            onClick={() => {
-                                handleTableOperation(
-                                    "addRowAbove",
-                                    tableContextMenu.element!
-                                );
-                                setTableContextMenu({
-                                    show: false,
-                                    x: 0,
-                                    y: 0,
-                                    element: null,
-                                });
-                            }}
-                        >
-                            ➕ Add Row Above
-                        </button>
-                        <button
-                            className="context-menu-item"
-                            onClick={() => {
-                                handleTableOperation(
-                                    "addRowBelow",
-                                    tableContextMenu.element!
-                                );
-                                setTableContextMenu({
-                                    show: false,
-                                    x: 0,
-                                    y: 0,
-                                    element: null,
-                                });
-                            }}
-                        >
-                            ➕ Add Row Below
-                        </button>
-                        <button
-                            className="context-menu-item"
-                            onClick={() => {
-                                handleTableOperation(
-                                    "addColumnLeft",
-                                    tableContextMenu.element!
-                                );
-                                setTableContextMenu({
-                                    show: false,
-                                    x: 0,
-                                    y: 0,
-                                    element: null,
-                                });
-                            }}
-                        >
-                            ➕ Add Column Left
-                        </button>
-                        <button
-                            className="context-menu-item"
-                            onClick={() => {
-                                handleTableOperation(
-                                    "addColumnRight",
-                                    tableContextMenu.element!
-                                );
-                                setTableContextMenu({
-                                    show: false,
-                                    x: 0,
-                                    y: 0,
-                                    element: null,
-                                });
-                            }}
-                        >
-                            ➕ Add Column Right
-                        </button>
-                        <div className="context-menu-divider"></div>
-                        <button
-                            className="context-menu-item danger"
-                            onClick={() => {
-                                handleTableOperation(
-                                    "deleteRow",
-                                    tableContextMenu.element!
-                                );
-                                setTableContextMenu({
-                                    show: false,
-                                    x: 0,
-                                    y: 0,
-                                    element: null,
-                                });
-                            }}
-                        >
-                            🗑️ Delete Row
-                        </button>
-                        <button
-                            className="context-menu-item danger"
-                            onClick={() => {
-                                handleTableOperation(
-                                    "deleteColumn",
-                                    tableContextMenu.element!
-                                );
-                                setTableContextMenu({
-                                    show: false,
-                                    x: 0,
-                                    y: 0,
-                                    element: null,
-                                });
-                            }}
-                        >
-                            🗑️ Delete Column
-                        </button>
-                        <button
-                            className="context-menu-item danger"
-                            onClick={() => {
-                                if (
-                                    confirm(
-                                        "Are you sure you want to delete this table?"
-                                    )
-                                ) {
-                                    selectedTable?.remove();
-                                    handleInput();
-                                }
-                                setTableContextMenu({
-                                    show: false,
-                                    x: 0,
-                                    y: 0,
-                                    element: null,
-                                });
-                            }}
-                        >
-                            🗑️ Delete Table
-                        </button>
-                    </div>
-                </div>
-            )}
-
             {showTableModal && (
                 <TableModal
                     onCreateTable={createTable}
@@ -932,18 +1076,27 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
             )}
 
             {showColorPicker && (
-                <ColorPicker
-                    type={showColorPicker}
-                    onColorSelect={(color) => {
-                        if (showColorPicker === "text") {
-                            toolbarActions.textColor(color);
-                        } else {
-                            toolbarActions.backgroundColor(color);
-                        }
-                        setShowColorPicker(null);
-                    }}
-                    onClose={() => setShowColorPicker(null)}
-                />
+                <div 
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 4px)",
+                    left: showColorPicker === "text" ? "200px" : "240px", // Approximate positions
+                    zIndex: 1000,
+                  }}
+                >
+                  <ColorPicker
+                      type={showColorPicker}
+                      onColorSelect={(color) => {
+                          if (showColorPicker === "text") {
+                              execCommand("foreColor", color);
+                          } else {
+                              execCommand("backColor", color);
+                          }
+                          setShowColorPicker(null);
+                      }}
+                      onClose={() => setShowColorPicker(null)}
+                  />
+                </div>
             )}
 
             {showEmojiPicker && (
@@ -953,6 +1106,30 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                         setShowEmojiPicker(false);
                     }}
                     onClose={() => setShowEmojiPicker(false)}
+                />
+            )}
+
+            {showSearchModal && (
+                <SearchModal
+                    isOpen={showSearchModal}
+                    onClose={() => setShowSearchModal(false)}
+                    onSearch={(searchTerm: string, replaceTerm?: string) => {
+                        if (replaceTerm !== undefined) {
+                            // Replace all
+                            if (editorRef.current) {
+                                const content = editorRef.current.innerHTML;
+                                const newContent = content.replace(
+                                    new RegExp(searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "g"),
+                                    replaceTerm
+                                );
+                                editorRef.current.innerHTML = newContent;
+                                handleInput();
+                            }
+                        } else {
+                            // Just find - we could implement highlighting here
+                            alert(`Found: ${searchTerm}`);
+                        }
+                    }}
                 />
             )}
         </div>
