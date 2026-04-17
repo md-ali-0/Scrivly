@@ -16,8 +16,15 @@ import { SearchModal } from "./SearchModal";
 import { TableModal } from "./TableModal";
 import { Toolbar } from "./Toolbar";
 import { VideoModal } from "./VideoModal";
+import DOMPurify from "dompurify";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { FloatingToolbar } from "./FloatingToolbar";
+import { SlashMenu } from "./SlashMenu";
 
-export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
+
+
+
+const ScrivlyEditorInner: React.FC<ScrivlyEditorProps> = ({
     value = "",
     onChange,
     onStateChange,
@@ -101,6 +108,16 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
         y: number;
         element: HTMLElement | null;
     }>({ show: false, x: 0, y: 0, element: null });
+    const [floatingToolbar, setFloatingToolbar] = useState<{
+        show: boolean;
+        x: number;
+        y: number;
+    }>({ show: false, x: 0, y: 0 });
+    const [slashMenu, setSlashMenu] = useState<{
+        show: boolean;
+        x: number;
+        y: number;
+    }>({ show: false, x: 0, y: 0 });
 
     // Auto-save functionality
     useEffect(() => {
@@ -125,13 +142,13 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
         );
     }, [darkMode]);
 
-    // Initialize editor content
     useEffect(() => {
         if (editorRef.current && value !== editorRef.current.innerHTML) {
-            editorRef.current.innerHTML = value;
+            const sanitizedValue = DOMPurify.sanitize(value);
+            editorRef.current.innerHTML = sanitizedValue;
             updateStats();
         }
-    }, [value]);
+    }, [value, updateStats]);
 
     // Update statistics
     const updateStats = useCallback(() => {
@@ -596,6 +613,30 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
         const handleSelectionChange = () => {
             if (document.activeElement === editorRef.current) {
                 updateActiveStates();
+
+                // Floating toolbar logic
+                const selection = window.getSelection();
+                if (
+                    selection &&
+                    !selection.isCollapsed &&
+                    selection.rangeCount > 0
+                ) {
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    const containerRect = editorRef.current?.getBoundingClientRect();
+
+                    if (containerRect) {
+                        setFloatingToolbar({
+                            show: true,
+                            x: rect.left - containerRect.left + rect.width / 2,
+                            y: rect.top - containerRect.top,
+                        });
+                    }
+                } else {
+                    setFloatingToolbar((prev) =>
+                        prev.show ? { ...prev, show: false } : prev
+                    );
+                }
             }
         };
 
@@ -605,14 +646,26 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                 "selectionchange",
                 handleSelectionChange
             );
-    }, [updateActiveStates]);
+    }, [updateActiveStates, editorRef]);
 
     // Handle paste
     const handlePaste = useCallback(
         (e: React.ClipboardEvent) => {
             e.preventDefault();
+            const html = e.clipboardData.getData("text/html");
             const text = e.clipboardData.getData("text/plain");
-            document.execCommand("insertText", false, text);
+
+            if (html) {
+                const sanitizedHtml = DOMPurify.sanitize(html, {
+                    ADD_TAGS: ["iframe"],
+                    ADD_ATTR: ["allowfullscreen", "frameborder", "target", "contenteditable"],
+                    FORBID_TAGS: ["script", "style"], // We allow style attribute but not style tag by default
+                    FORCE_BODY: true,
+                });
+                document.execCommand("insertHTML", false, sanitizedHtml);
+            } else {
+                document.execCommand("insertText", false, text);
+            }
             handleInput();
         },
         [handleInput]
@@ -727,8 +780,34 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                     }
                 }
             }
+            
+            // Slash command detection
+            if (e.key === "/") {
+                setTimeout(() => {
+                    const selection = window.getSelection();
+                    if (selection && selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        const preText = range.startContainer.textContent?.slice(0, range.startOffset - 1) || "";
+                        
+                        if (preText.length === 0 || /\s$/.test(preText)) {
+                            const rect = range.getBoundingClientRect();
+                            const containerRect = editorRef.current?.getBoundingClientRect();
+
+                            if (containerRect) {
+                                setSlashMenu({
+                                    show: true,
+                                    x: rect.left - containerRect.left,
+                                    y: rect.bottom - containerRect.top + 5,
+                                });
+                            }
+                        }
+                    }
+                }, 10);
+            } else if (slashMenu.show && !["ArrowUp", "ArrowDown", "Enter", "Escape"].includes(e.key)) {
+                setSlashMenu({ show: false, x: 0, y: 0 });
+            }
         },
-        [toolbarActions, editorRef]
+        [toolbarActions, editorRef, slashMenu.show]
     );
 
     // Handle table operations
@@ -1027,8 +1106,53 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                 style={{
                     maxHeight: isFullscreen ? "100vh" : maxHeight,
                     minHeight,
+                    position: "relative",
                 }}
             >
+                <FloatingToolbar
+                    position={{ x: floatingToolbar.x, y: floatingToolbar.y }}
+                    isVisible={floatingToolbar.show}
+                    activeFormats={isActive}
+                    onAction={(action) => {
+                        if (
+                            typeof toolbarActions[
+                                action as keyof typeof toolbarActions
+                            ] === "function"
+                        ) {
+                            (
+                                toolbarActions[
+                                    action as keyof typeof toolbarActions
+                                ] as Function
+                            )();
+                        }
+                    }}
+                />
+                
+                {slashMenu.show && (
+                    <SlashMenu
+                        position={{ x: slashMenu.x, y: slashMenu.y }}
+                        onSelect={(id) => {
+                            // Find and remove the slash
+                            const selection = window.getSelection();
+                            if (selection && selection.rangeCount > 0) {
+                                const range = selection.getRangeAt(0);
+                                // The / was already typed, so we need to find it
+                                // This is a simplified version
+                                document.execCommand("undo"); // Easiest way to remove the typed "/"
+                            }
+                            
+                            if (id.startsWith("h") && id.length === 2) {
+                                toolbarActions.formatBlock(id as BlockFormat);
+                            } else if (id in toolbarActions) {
+                                (toolbarActions[id as keyof typeof toolbarActions] as Function)();
+                            }
+                            
+                            setSlashMenu({ show: false, x: 0, y: 0 });
+                        }}
+                        onClose={() => setSlashMenu({ show: false, x: 0, y: 0 })}
+                    />
+                )}
+
                 <div
                     ref={editorRef}
                     contentEditable={!readOnly}
@@ -1133,5 +1257,13 @@ export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = ({
                 />
             )}
         </div>
+    );
+};
+
+export const ScrivlyEditor: React.FC<ScrivlyEditorProps> = (props) => {
+    return (
+        <ErrorBoundary>
+            <ScrivlyEditorInner {...props} />
+        </ErrorBoundary>
     );
 };

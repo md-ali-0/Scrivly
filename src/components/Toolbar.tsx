@@ -262,9 +262,9 @@ export const Toolbar: React.FC<ToolbarProps> = (props: ToolbarProps) => {
     ...Object.keys(groupedCustomTools).map((group) => groupedCustomTools[group].map((tool) => tool.id)),
   ]
 
-  const renderImageButton = () => {
+  const renderImageButton = (key: string) => {
     return (
-      <div className="dropdown-container" style={{ position: "relative" }}>
+      <div key={key} className="dropdown-container" style={{ position: "relative" }}>
         <button
           className={`toolbar-button ${activeDropdown === "image" ? "active" : ""}`}
           onClick={() => onAction("image")}
@@ -434,7 +434,7 @@ export const Toolbar: React.FC<ToolbarProps> = (props: ToolbarProps) => {
     
     // Special handling for image button
     if (option === "image") {
-      return renderImageButton();
+      return renderImageButton(option);
     }
 
     // Default button rendering
